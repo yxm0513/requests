@@ -20,11 +20,11 @@ warnings.filterwarnings(action="ignore", module=".*grequests.*")
 warnings.filterwarnings(action="ignore", module=".*urllib3.*")
 
 
-serach = 'https://www.taoguba.com.cn/getSearchTopicResult?pageNo=%s&searchDate=6'
+serach = 'https://www.taoguba.com.cn/best?pageNo=%s&blockID=0&flag=0'
 
 urls = []
-for c in range(1, 68):
-    b = serach % c + '&subject=%E6%88%98%E6%B3%95&type=2'
+for c in range(0, 354):
+    b = serach % c
     urls.append(b)
 
 
@@ -42,7 +42,7 @@ for i in range(1, pages + 1, MAX_CONNECTIONS):
     print("1 Waiting %s" % i)  # Optional, so you see something is done.
     rs = (grequests.get(u, timeout=1000, verify=False) for u in urls[i:i + MAX_CONNECTIONS])
     a = list(rs)
-    time.sleep(0.2)  # You can change this to whatever you see works better.
+    #time.sleep(0.2)  # You can change this to whatever you see works better.
     results = grequests.map(a, exception_handler=my_exception_handler)  # The key here is to extend, not append, not insert.
     print("result1 : %s" % len(results))
     print(results)
@@ -50,9 +50,15 @@ for i in range(1, pages + 1, MAX_CONNECTIONS):
         if x:
             print(x.status_code)
             try:
-                js = json.loads(x.text)
-                for j in js['dto']['topicAttr']:
-                    all.append('https://www.taoguba.com.cn/Article/%s/1' % j['topicID'])
+                soup = BeautifulSoup(x.text, 'html.parser')
+
+                content = soup.find('div', class_='p_list01')
+                content1 = content.find('li',class_='pcdj02')
+                if content1:
+                    l = content1.find('a')
+                    link = l.get('href')
+                    print("link" + link)
+                    all.append('https://www.taoguba.com.cn/%s' % link)
             except:
                 pass
             x.close()
@@ -81,7 +87,6 @@ for a in all:
         all.remove(a)
     else:
         done_all.append(a)
-
 
 for i in range(1, pages + 1, MAX_CONNECTIONS):
     print("2 Waiting %s" % i)  # Optional, so you see something is done.
@@ -112,7 +117,6 @@ done = open("done", 'wb')
 marshal.dump(done_all, done)
 done.close()
 
-
 html = '''<!DOCTYPE html>
 <html>
 <head>
@@ -142,5 +146,5 @@ css = CSS(string='''
 
 #print(html)
 report_html = HTML(string=html)
-report_html.write_pdf(target='test.pdf', stylesheets=[css],
+report_html.write_pdf(target='best.pdf', stylesheets=[css],
     font_config=font_config)
