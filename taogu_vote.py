@@ -15,6 +15,15 @@ from fake_useragent import UserAgent
 
 ua = UserAgent()
 headers = {'User-Agent':str(ua.chrome)}
+
+headers = {
+'Accept': '*/*',
+'Accept-Encoding': 'gzip, deflate, br',
+'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+'Connection': 'keep-alive',
+'User-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW 64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36 QIHU 360SE'
+}
+
 #import pdfkit
 import warnings
 from weasyprint import HTML, CSS
@@ -23,11 +32,16 @@ warnings.filterwarnings(action="ignore", module=".*grequests.*")
 warnings.filterwarnings(action="ignore", module=".*urllib3.*")
 
 
-serach = 'https://www.taoguba.com.cn/useful?pageNo=%s&blockID=0&flag=0'
+search = 'https://www.taoguba.com.cn/useful?pageNo=%s&blockID=0&flag=0'
+host = search.split('//')[1].split('/')[0]
+headers['Host'] = host
+headers['referer'] = f"https://{host}"
+
+
 
 urls = []
 for c in range(0, 1862):
-    b = serach % c
+    b = search % c
     urls.append(b)
 
 
