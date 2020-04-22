@@ -10,8 +10,11 @@ import csv
 import json
 from openpyxl import Workbook
 import base64
+from fake_useragent import UserAgent
 #from PDFWriter import PDFWriter
 
+ua = UserAgent()
+headers = {'User-Agent':str(ua.chrome)}
 #import pdfkit
 import warnings
 from weasyprint import HTML, CSS
@@ -40,9 +43,9 @@ all = []
 pages = len(urls)
 for i in range(1, pages + 1, MAX_CONNECTIONS):
     print("1 Waiting %s" % i)  # Optional, so you see something is done.
-    rs = (grequests.get(u, timeout=1000, verify=False) for u in urls[i:i + MAX_CONNECTIONS])
-    a = list(rs)
+    rs = (grequests.get(u, timeout=1000, headers=headers, verify=False) for u in urls[i:i + MAX_CONNECTIONS])
     time.sleep(0.2)  # You can change this to whatever you see works better.
+    a = list(rs)
     results = grequests.map(a, exception_handler=my_exception_handler)  # The key here is to extend, not append, not insert.
     print("result1 : %s" % len(results))
     print(results)
@@ -91,7 +94,7 @@ for a in all:
 
 for i in range(1, pages + 1, MAX_CONNECTIONS):
     print("2 Waiting %s" % i)  # Optional, so you see something is done.
-    rs = (grequests.get(u, verify=False, timeout=1000) for u in all[i:i + MAX_CONNECTIONS])
+    rs = (grequests.get(u, verify=False, headers=headers, timeout=1000) for u in all[i:i + MAX_CONNECTIONS])
     time.sleep(0.2)  # You can change this to whatever you see works better.
     results = grequests.map(rs, exception_handler=my_exception_handler)  # The key here is to extend, not append, not insert.
     #print("result2 : %s" % len(results))
